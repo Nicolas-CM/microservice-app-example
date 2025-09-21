@@ -45,8 +45,8 @@ Utilizamos Main-Only Strategy para infraestructura, priorizando la estabilidad y
 
 | Rama | Propósito | Origen | Merge a |
 |------|-----------|--------|----------|
-| `infra-main` | Infraestructura en producción | - | - |
-| `infra-develop` | Cambios de infraestructura | `infra-main` | `infra-main` |
+| `main` | Infraestructura en producción | - | - |
+| `infra-develop` | Cambios de infraestructura | `main` | `main` |
 
 ## Estándar de Commits
 
