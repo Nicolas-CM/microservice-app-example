@@ -9,51 +9,78 @@ const OPERATION_CREATE = 'CREATE',
 class TodoController {
     constructor({tracer, redisClient, logChannel}) {
         this._tracer = tracer;
-        this._redisClient = redisClient;
+        // Promisify the redis get and setex methods
+        this._redisClient = {
+            get: (key) => new Promise((resolve, reject) => {
+                redisClient.get(key, (err, reply) => {
+                    if (err) reject(err);
+                    else resolve(reply);
+                });
+            }),
+            setex: (key, ttl, value) => new Promise((resolve, reject) => {
+                redisClient.setex(key, ttl, value, (err, reply) => {
+                    if (err) reject(err);
+                    else resolve(reply);
+                });
+            })
+        };
+        // Keep the original client for publish operations
+        this._redisPublisher = redisClient;
         this._logChannel = logChannel;
     }
 
     // TODO: these methods are not concurrent-safe
-    list (req, res) {
-        const data = this._getTodoData(req.user.username)
-
-        res.json(data.items)
-    }
-
-    create (req, res) {
-        // TODO: must be transactional and protected for concurrent access, but
-        // the purpose of the whole example app it's enough
-        const data = this._getTodoData(req.user.username)
-        const todo = {
-            content: req.body.content,
-            id: data.lastInsertedID
+    async list (req, res) {
+        try {
+            const data = await this._getTodoData(req.user.username);
+            res.json(data.items);
+        } catch (err) {
+            console.error('Error fetching todo list:', err);
+            res.status(500).json({ error: 'Internal server error' });
         }
-        data.items[data.lastInsertedID] = todo
-
-        data.lastInsertedID++
-        this._setTodoData(req.user.username, data)
-
-        this._logOperation(OPERATION_CREATE, req.user.username, todo.id)
-
-        res.json(todo)
     }
 
-    delete (req, res) {
-        const data = this._getTodoData(req.user.username)
-        const id = req.params.taskId
-        delete data.items[id]
-        this._setTodoData(req.user.username, data)
+    async create (req, res) {
+        try {
+            const data = await this._getTodoData(req.user.username);
+            const todo = {
+                content: req.body.content,
+                id: data.lastInsertedID
+            };
+            data.items[data.lastInsertedID] = todo;
 
-        this._logOperation(OPERATION_DELETE, req.user.username, id)
+            data.lastInsertedID++;
+            await this._setTodoData(req.user.username, data);
 
-        res.status(204)
-        res.send()
+            this._logOperation(OPERATION_CREATE, req.user.username, todo.id);
+
+            res.json(todo);
+        } catch (err) {
+            console.error('Error creating todo:', err);
+            res.status(500).json({ error: 'Internal server error' });
+        }
+    }
+
+    async delete (req, res) {
+        try {
+            const data = await this._getTodoData(req.user.username);
+            const id = req.params.taskId;
+            delete data.items[id];
+            await this._setTodoData(req.user.username, data);
+
+            this._logOperation(OPERATION_DELETE, req.user.username, id);
+
+            res.status(204).send();
+        } catch (err) {
+            console.error('Error deleting todo:', err);
+            res.status(500).json({ error: 'Internal server error' });
+        }
     }
 
     _logOperation (opName, username, todoId) {
         this._tracer.scoped(() => {
             const traceId = this._tracer.id;
-            this._redisClient.publish(this._logChannel, JSON.stringify({
+            this._redisPublisher.publish(this._logChannel, JSON.stringify({
                 zipkinSpan: traceId,
                 opName: opName,
                 username: username,
@@ -62,34 +89,48 @@ class TodoController {
         })
     }
 
-    _getTodoData (userID) {
-        var data = cache.get(userID)
-        if (data == null) {
-            data = {
-                items: {
-                    '1': {
-                        id: 1,
-                        content: "Create new todo",
-                    },
-                    '2': {
-                        id: 2,
-                        content: "Update me",
-                    },
-                    '3': {
-                        id: 3,
-                        content: "Delete example ones",
-                    }
-                },
-                lastInsertedID: 3
+    async _getTodoData (userID) {
+        // Try to get data from Redis cache first
+        try {
+            const cachedData = await this._redisClient.get(`todos:${userID}`);
+            if (cachedData) {
+                return JSON.parse(cachedData);
             }
-
-            this._setTodoData(userID, data)
+        } catch (err) {
+            console.error('Redis cache read error:', err);
         }
-        return data
+
+        // If cache miss or error, return default data
+        const data = {
+            items: {
+                '1': {
+                    id: 1,
+                    content: "Create new todo",
+                },
+                '2': {
+                    id: 2,
+                    content: "Update me",
+                },
+                '3': {
+                    id: 3,
+                    content: "Delete example ones",
+                }
+            },
+            lastInsertedID: 3
+        };
+
+        // Store in cache for future requests
+        await this._setTodoData(userID, data);
+        return data;
     }
 
-    _setTodoData (userID, data) {
-        cache.put(userID, data)
+    async _setTodoData (userID, data) {
+        try {
+            // Cache for 1 hour (3600 seconds)
+            await this._redisClient.setex(`todos:${userID}`, 3600, JSON.stringify(data));
+        } catch (err) {
+            console.error('Redis cache write error:', err);
+        }
     }
 }
 
