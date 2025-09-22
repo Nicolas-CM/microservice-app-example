@@ -3,5 +3,5 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 COPY . .
-EXPOSE 8080
-CMD ["npm", "run", "dev"]
+EXPOSE 80
+CMD ["npm", "run", "dev", "--", "--port", "80"]

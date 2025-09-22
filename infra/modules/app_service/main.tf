@@ -39,4 +39,10 @@ resource "azurerm_linux_web_app" "app" {
     Environment = var.environment
     Project     = "microservices-example"
   }
+
+  timeouts {
+    create = "30m"
+    update = "30m"
+    delete = "30m"
+  }
 }
