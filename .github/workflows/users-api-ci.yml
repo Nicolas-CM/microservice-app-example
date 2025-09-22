@@ -26,29 +26,29 @@ jobs:
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
+
+    - name: Login to Azure Container Registry
+      uses: azure/docker-login@v1
+      with:
+        login-server: ${{ env.ACR_NAME }}.azurecr.io
+
     - name: Build and push image to ACR
-      run: |
-        az acr build --registry ${{ env.ACR_NAME }} \
-                     --image ${{ env.SERVICE_NAME }}:${{ env.IMAGE_TAG }} \
-                     --image ${{ env.SERVICE_NAME }}:latest \
-                     --file ./users-api/Dockerfile \
-                     ./users-api
+      uses: docker/build-push-action@v4
+      with:
+        context: ./users-api
+        file: ./users-api/Dockerfile
+        push: true
+        tags: |
+          ${{ env.ACR_NAME }}.azurecr.io/${{ env.SERVICE_NAME }}:${{ env.IMAGE_TAG }}
+          ${{ env.ACR_NAME }}.azurecr.io/${{ env.SERVICE_NAME }}:latest
 
     - name: Update App Service
-      run: |
-        # Obtener credenciales del ACR
-        ACR_CREDS=$(az acr credential show --name ${{ env.ACR_NAME }})
-        ACR_USERNAME=$(echo $ACR_CREDS | jq -r .username)
-        ACR_PASSWORD=$(echo $ACR_CREDS | jq -r .passwords[0].value)
-        
-        # Actualizar la configuración del App Service
-        az webapp config container set \
-          --name microservice-app-dev-${{ env.SERVICE_NAME }} \
-          --resource-group ${{ env.RESOURCE_GROUP }} \
-          --docker-custom-image-name ${{ env.ACR_NAME }}.azurecr.io/${{ env.SERVICE_NAME }}:${{ env.IMAGE_TAG }} \
-          --docker-registry-server-url https://${{ env.ACR_NAME }}.azurecr.io \
-          --docker-registry-server-user "$ACR_USERNAME" \
-          --docker-registry-server-password "$ACR_PASSWORD"
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: microservice-app-dev-${{ env.SERVICE_NAME }}
+        images: ${{ env.ACR_NAME }}.azurecr.io/${{ env.SERVICE_NAME }}:${{ env.IMAGE_TAG }}
 
     - name: Health check
       run: |
