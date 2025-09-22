@@ -33,6 +33,8 @@ jobs:
       uses: azure/docker-login@v1
       with:
         login-server: ${{ env.ACR_NAME }}.azurecr.io
+        username: ${{ secrets.ACR_USERNAME }}
+        password: ${{ secrets.ACR_PASSWORD }}
 
     - name: Build and push image to ACR
       uses: docker/build-push-action@v4
@@ -45,10 +47,14 @@ jobs:
           ${{ env.ACR_NAME }}.azurecr.io/${{ env.SERVICE_NAME }}:latest
 
     - name: Update App Service
-      uses: azure/webapps-deploy@v2
-      with:
-        app-name: microservice-app-dev-${{ env.SERVICE_NAME }}
-        images: ${{ env.ACR_NAME }}.azurecr.io/${{ env.SERVICE_NAME }}:${{ env.IMAGE_TAG }}
+      run: |
+        az webapp config container set \
+          --name microservice-app-dev-${{ env.SERVICE_NAME }} \
+          --resource-group ${{ env.RESOURCE_GROUP }} \
+          --docker-custom-image-name ${{ env.ACR_NAME }}.azurecr.io/${{ env.SERVICE_NAME }}:${{ env.IMAGE_TAG }} \
+          --docker-registry-server-url https://${{ env.ACR_NAME }}.azurecr.io \
+          --docker-registry-server-user ${{ secrets.ACR_USERNAME }} \
+          --docker-registry-server-password ${{ secrets.ACR_PASSWORD }}
 
     - name: Health check
       run: |
