@@ -1,0 +1,68 @@
+name: Users API CI/CD
+
+on:
+  push:
+    branches: [ main, infra-develop ]
+    paths:
+      - 'users-api/**'
+      - '.github/workflows/users-api-ci.yml'
+
+env:
+  SERVICE_NAME: users-api
+  ACR_NAME: microserviceappdevacr
+  RESOURCE_GROUP: microservice-app-dev-rg  # Nombre correcto del resource group según Azure
+  IMAGE_TAG: v1.0.${{ github.run_number }}
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment: development
+    
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Build and push image to ACR
+      run: |
+        az acr build --registry ${{ env.ACR_NAME }} \
+                     --image ${{ env.SERVICE_NAME }}:${{ env.IMAGE_TAG }} \
+                     --image ${{ env.SERVICE_NAME }}:latest \
+                     --file ./users-api/Dockerfile \
+                     ./users-api
+
+    - name: Update App Service
+      run: |
+        # Obtener credenciales del ACR
+        ACR_CREDS=$(az acr credential show --name ${{ env.ACR_NAME }})
+        ACR_USERNAME=$(echo $ACR_CREDS | jq -r .username)
+        ACR_PASSWORD=$(echo $ACR_CREDS | jq -r .passwords[0].value)
+        
+        # Actualizar la configuración del App Service
+        az webapp config container set \
+          --name microservice-app-dev-${{ env.SERVICE_NAME }} \
+          --resource-group ${{ env.RESOURCE_GROUP }} \
+          --docker-custom-image-name ${{ env.ACR_NAME }}.azurecr.io/${{ env.SERVICE_NAME }}:${{ env.IMAGE_TAG }} \
+          --docker-registry-server-url https://${{ env.ACR_NAME }}.azurecr.io \
+          --docker-registry-server-user "$ACR_USERNAME" \
+          --docker-registry-server-password "$ACR_PASSWORD"
+
+    - name: Health check
+      run: |
+        echo "Waiting for service to start..."
+        sleep 30
+        HEALTH_URL="https://microservice-app-dev-${{ env.SERVICE_NAME }}.azurewebsites.net/actuator/health"
+        for i in {1..6}; do
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" $HEALTH_URL)
+          if [ $HTTP_STATUS -eq 200 ]; then
+            echo "Service is healthy"
+            exit 0
+          fi
+          echo "Attempt $i: Service not healthy yet (Status: $HTTP_STATUS). Waiting..."
+          sleep 10
+        done
+        echo "Service health check failed"
+        exit 1
