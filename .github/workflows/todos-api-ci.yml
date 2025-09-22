@@ -1,16 +1,16 @@
-name: Users API CI/CD
+name: Todos API CI/CD
 
 on:
   push:
     branches: [ main, infra-develop ]
     paths:
-      - 'users-api/**'
-      - '.github/workflows/users-api-ci.yml'
+      - 'todos-api/**'
+      - '.github/workflows/todos-api-ci.yml'
 
 env:
-  SERVICE_NAME: users-api
+  SERVICE_NAME: todos-api
   ACR_NAME: microserviceappdevacr
-  RESOURCE_GROUP: microservice-app-dev-rg  # Nombre correcto del resource group según Azure
+  RESOURCE_GROUP: microservice-app-dev-rg
   IMAGE_TAG: v1.0.${{ github.run_number }}
 
 jobs:
@@ -39,8 +39,8 @@ jobs:
     - name: Build and push image to ACR
       uses: docker/build-push-action@v4
       with:
-        context: ./users-api
-        file: ./users-api/Dockerfile
+        context: ./todos-api
+        file: ./todos-api/Dockerfile
         push: true
         tags: |
           ${{ env.ACR_NAME }}.azurecr.io/${{ env.SERVICE_NAME }}:${{ env.IMAGE_TAG }}

@@ -1,16 +1,16 @@
-name: Users API CI/CD
+name: Frontend CI/CD
 
 on:
   push:
     branches: [ main, infra-develop ]
     paths:
-      - 'users-api/**'
-      - '.github/workflows/users-api-ci.yml'
+      - 'frontend/**'
+      - '.github/workflows/frontend-ci.yml'
 
 env:
-  SERVICE_NAME: users-api
+  SERVICE_NAME: frontend
   ACR_NAME: microserviceappdevacr
-  RESOURCE_GROUP: microservice-app-dev-rg  # Nombre correcto del resource group según Azure
+  RESOURCE_GROUP: microservice-app-dev-rg
   IMAGE_TAG: v1.0.${{ github.run_number }}
 
 jobs:
@@ -39,8 +39,8 @@ jobs:
     - name: Build and push image to ACR
       uses: docker/build-push-action@v4
       with:
-        context: ./users-api
-        file: ./users-api/Dockerfile
+        context: ./frontend
+        file: ./frontend/Dockerfile
         push: true
         tags: |
           ${{ env.ACR_NAME }}.azurecr.io/${{ env.SERVICE_NAME }}:${{ env.IMAGE_TAG }}
@@ -56,3 +56,19 @@ jobs:
           --docker-registry-server-user ${{ secrets.ACR_USERNAME }} \
           --docker-registry-server-password ${{ secrets.ACR_PASSWORD }}
 
+    - name: Health check
+      run: |
+        echo "Waiting for service to start..."
+        sleep 30
+        HEALTH_URL="https://microservice-app-dev-${{ env.SERVICE_NAME }}.azurewebsites.net/"
+        for i in {1..6}; do
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" $HEALTH_URL)
+          if [ $HTTP_STATUS -eq 200 ]; then
+            echo "Service is healthy"
+            exit 0
+          fi
+          echo "Attempt $i: Service not healthy yet (Status: $HTTP_STATUS). Waiting..."
+          sleep 10
+        done
+        echo "Service health check failed"
+        exit 1

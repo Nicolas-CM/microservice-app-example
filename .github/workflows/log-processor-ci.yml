@@ -1,16 +1,16 @@
-name: Users API CI/CD
+name: Log Message Processor CI/CD
 
 on:
   push:
     branches: [ main, infra-develop ]
     paths:
-      - 'users-api/**'
-      - '.github/workflows/users-api-ci.yml'
+      - 'log-message-processor/**'
+      - '.github/workflows/log-processor-ci.yml'
 
 env:
-  SERVICE_NAME: users-api
+  SERVICE_NAME: log-processor
   ACR_NAME: microserviceappdevacr
-  RESOURCE_GROUP: microservice-app-dev-rg  # Nombre correcto del resource group según Azure
+  RESOURCE_GROUP: microservice-app-dev-rg
   IMAGE_TAG: v1.0.${{ github.run_number }}
 
 jobs:
@@ -39,8 +39,8 @@ jobs:
     - name: Build and push image to ACR
       uses: docker/build-push-action@v4
       with:
-        context: ./users-api
-        file: ./users-api/Dockerfile
+        context: ./log-message-processor
+        file: ./log-message-processor/Dockerfile
         push: true
         tags: |
           ${{ env.ACR_NAME }}.azurecr.io/${{ env.SERVICE_NAME }}:${{ env.IMAGE_TAG }}
@@ -56,3 +56,4 @@ jobs:
           --docker-registry-server-user ${{ secrets.ACR_USERNAME }} \
           --docker-registry-server-password ${{ secrets.ACR_PASSWORD }}
 
+    # Note: No health check for log processor as it's a background service
