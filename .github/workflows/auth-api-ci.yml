@@ -2,7 +2,12 @@ name: Auth API CI/CD
 
 on:
   push:
-    branches: [ main, infra-develop ]
+    branches: [ master, infra-develop, develop ]
+    paths:
+      - 'auth-api/**'
+      - '.github/workflows/auth-api-ci.yml'
+  pull_request:
+    branches: [ master, infra-develop, develop ]
     paths:
       - 'auth-api/**'
       - '.github/workflows/auth-api-ci.yml'

@@ -2,7 +2,12 @@ name: Todos API CI/CD
 
 on:
   push:
-    branches: [ main, infra-develop ]
+    branches: [ master, infra-develop, develop ]
+    paths:
+      - 'todos-api/**'
+      - '.github/workflows/todos-api-ci.yml'
+  pull_request:
+    branches: [ master, infra-develop, develop ]
     paths:
       - 'todos-api/**'
       - '.github/workflows/todos-api-ci.yml'

@@ -2,7 +2,12 @@ name: Log Message Processor CI/CD
 
 on:
   push:
-    branches: [ main, infra-develop ]
+    branches: [ master, infra-develop, develop ]
+    paths:
+      - 'log-message-processor/**'
+      - '.github/workflows/log-processor-ci.yml'
+  pull_request:
+    branches: [ master, infra-develop, develop ]
     paths:
       - 'log-message-processor/**'
       - '.github/workflows/log-processor-ci.yml'
