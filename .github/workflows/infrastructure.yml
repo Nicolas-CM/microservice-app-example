@@ -72,6 +72,15 @@ jobs:
         TF_VAR_client_id: ${{ secrets.AZURE_CLIENT_ID }}
         TF_VAR_client_secret: ${{ secrets.AZURE_CLIENT_SECRET }}
         TF_VAR_jwt_secret: ${{ secrets.JWT_SECRET }}
+        TF_VAR_environment: "dev"
+        TF_VAR_project_name: "microservice-app"
+        TF_VAR_location: "eastus"
+        # Versiones de los servicios (usando latest por defecto)
+        TF_VAR_frontend_version: "latest"
+        TF_VAR_auth_api_version: "latest"
+        TF_VAR_users_api_version: "latest"
+        TF_VAR_todos_api_version: "latest"
+        TF_VAR_log_processor_version: "latest"
 
     - name: Upload Terraform Plan
       if: github.ref == 'refs/heads/infra-develop'
@@ -92,6 +101,15 @@ jobs:
         TF_VAR_client_id: ${{ secrets.AZURE_CLIENT_ID }}
         TF_VAR_client_secret: ${{ secrets.AZURE_CLIENT_SECRET }}
         TF_VAR_jwt_secret: ${{ secrets.JWT_SECRET }}
+        TF_VAR_environment: "dev"
+        TF_VAR_project_name: "microservice-app"
+        TF_VAR_location: "eastus"
+        # Versiones de los servicios (usando latest por defecto)
+        TF_VAR_frontend_version: "latest"
+        TF_VAR_auth_api_version: "latest"
+        TF_VAR_users_api_version: "latest"
+        TF_VAR_todos_api_version: "latest"
+        TF_VAR_log_processor_version: "latest"
 
     - name: Terraform Apply (master)
       if: github.ref == 'refs/heads/master'
@@ -103,3 +121,12 @@ jobs:
         TF_VAR_client_id: ${{ secrets.AZURE_CLIENT_ID }}
         TF_VAR_client_secret: ${{ secrets.AZURE_CLIENT_SECRET }}
         TF_VAR_jwt_secret: ${{ secrets.JWT_SECRET }}
+        TF_VAR_environment: "dev"
+        TF_VAR_project_name: "microservice-app"
+        TF_VAR_location: "eastus"
+        # Versiones de los servicios (usando latest por defecto)
+        TF_VAR_frontend_version: "latest"
+        TF_VAR_auth_api_version: "latest"
+        TF_VAR_users_api_version: "latest"
+        TF_VAR_todos_api_version: "latest"
+        TF_VAR_log_processor_version: "latest"
