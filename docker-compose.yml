@@ -2,10 +2,10 @@ services:
   frontend:
     build: ./frontend
     ports:
-      - "8080:8080"
+      - "8080:80"
     environment:
-      - AUTH_API_ADDRESS=http://auth-api:8081
-      - TODOS_API_ADDRESS=http://todos-api:8082
+      - AUTH_API_URL=http://auth-api:8081
+      - TODOS_API_URL=http://todos-api:8082
     depends_on:
       - auth-api
       - todos-api
