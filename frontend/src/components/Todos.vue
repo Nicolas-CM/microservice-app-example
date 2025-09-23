@@ -75,6 +75,17 @@ export default {
     }
   },
   created () {
+    // Detectar id_token en la URL (hash params)
+    const hash = window.location.hash
+    const match = hash.match(/id_token=([^&]+)/)
+    if (match) {
+      const token = match[1]
+      // Guardar token en el store y marcar sesión activa
+      this.$store.commit('setAccessToken', token)
+      this.$store.state.auth.isLoggedIn = true
+      // Limpiar el id_token de la URL
+      window.location.hash = '#/todos'
+    }
     this.loadTasks()
   },
   computed: {

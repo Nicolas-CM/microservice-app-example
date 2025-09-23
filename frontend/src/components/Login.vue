@@ -63,6 +63,9 @@
                     <div class='col-md-3'></div>
                     <div class='col-md-6'>
                         <button type='submit' class='btn btn-success'><i class='fa fa-sign-in'></i> Login</button>
+                        <button type='button' class='btn btn-primary' style='margin-left: 1rem' @click='loginWithAuth0'>
+                          <i class='fa fa-user-circle'></i> Login con Auth0
+                        </button>
                     </div>
                 </div>
             </form>
@@ -77,6 +80,35 @@ import AppNav from '@/components/AppNav'
 export default {
   name: 'login',
   components: { AppNav, Spinner },
+  mounted () {
+    // Detectar id_token en la URL (hash params)
+    const hash = window.location.hash
+    const match = hash.match(/id_token=([^&]+)/)
+    if (match) {
+      const token = match[1]
+      this.$store.commit('setAccessToken', token)
+      this.$store.state.auth.isLoggedIn = true
+      // Decodificar el token para obtener el email
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]))
+        if (payload.email) {
+          // Consultar al backend si el usuario existe
+          this.$http.get('/users-api/users/' + encodeURIComponent(payload.email))
+            .then(() => {
+              // Usuario existe, ir a todos
+              window.location.hash = '#/todos'
+            })
+            .catch(() => {
+              // Usuario no existe, ir a registro
+              window.location.hash = '#/register?id_token=' + token
+            })
+          return
+        }
+      } catch (e) {}
+      // Si no hay email, ir a todos por defecto
+      window.location.hash = '#/todos'
+    }
+  },
   methods: {
     doLogin: function () {
       this.loggingIn = true
@@ -91,6 +123,10 @@ export default {
         this.loggingIn = false
         this.errorMessage = response.body.message
       })
+    },
+    loginWithAuth0: function () {
+      // Redirigir al endpoint federado del backend
+      window.location.href = '/auth-api/auth0/login'
     }
   },
   data () {

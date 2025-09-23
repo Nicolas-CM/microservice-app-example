@@ -12,6 +12,11 @@ export default new Router({
       component: require('@/components/Login.vue')
     },
     {
+      path: '/register',
+      name: 'register',
+      component: require('@/components/Register.vue')
+    },
+    {
       path: '/',
       alias: '/todos',
       name: 'todos',

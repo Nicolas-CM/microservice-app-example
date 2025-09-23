@@ -1,3 +1,11 @@
+import { STORAGE_KEY } from './state'
+export function setAccessToken (state, token) {
+  state.auth = state.auth || {}
+  state.auth.accessToken = token
+
+  // Persistir en localStorage
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
+}
 export const UPDATE_AUTH = (state, auth) => {
   state.auth = auth
 }

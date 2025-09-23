@@ -1,8 +1,9 @@
-FROM golang:1.18.2
+FROM golang:1.24
 WORKDIR /app
+COPY go.mod ./
+COPY go.sum ./
 COPY . .
-RUN go mod init github.com/bortizf/microservice-app-example/tree/master/auth-api \
-    && go mod tidy \
-    && go build -o auth-api
+RUN go mod tidy
+RUN go build -o auth-api
 EXPOSE 8081
 CMD ["./auth-api"]

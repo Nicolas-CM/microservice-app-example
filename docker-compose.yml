@@ -18,6 +18,9 @@ services:
       - AUTH_API_PORT=8081
       - USERS_API_ADDRESS=http://users-api:8083
       - JWT_SECRET=myfancysecret
+      - AUTH0_DOMAIN=dev-tid73ii8jxvdvwqs.us.auth0.com
+      - AUTH0_CLIENT_ID=mo5ymMcSCCTv5T5ierrnuNVpTkZ1M4z5
+      - AUTH0_CLIENT_SECRET=7zWZDWBiJms-EJHj-a6AM10N_l06AQvxH_l6hhRZVos9YWc-s2VCuUlUtBDukM94
     depends_on:
       - users-api
 
