@@ -43,8 +43,8 @@ module "frontend" {
   docker_image_tag   = var.frontend_version
   
   app_settings = {
-    "AUTH_API_ADDRESS"      = "https://${module.auth_api.app_url}"
-    "TODOS_API_ADDRESS"     = "https://${module.todos_api.app_url}"
+    "AUTH_API_URL"      = "https://${module.auth_api.app_url}"
+    "TODOS_API_URL"     = "https://${module.todos_api.app_url}"
   }
 }
 

@@ -19,7 +19,7 @@ resource "azurerm_linux_web_app" "app" {
 
   site_config {
     application_stack {
-      docker_image_name = "${var.acr_login_server}/${var.docker_image}:${var.docker_image_tag}"
+      docker_image_name = "${var.docker_image}:${var.docker_image_tag}"
     }
     always_on = true
   }
