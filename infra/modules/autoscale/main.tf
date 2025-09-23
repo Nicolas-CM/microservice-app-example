@@ -73,13 +73,6 @@ resource "azurerm_monitor_autoscale_setting" "app_autoscale" {
     }
   }
 
-  notification {
-    email {
-      send_to_subscription_administrator    = true
-      send_to_subscription_co_administrator = true
-    }
-  }
-
   tags = {
     Environment = var.environment
     Service     = var.service_name
