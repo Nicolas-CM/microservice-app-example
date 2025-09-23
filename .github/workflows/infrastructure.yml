@@ -62,8 +62,7 @@ jobs:
       working-directory: ./infra
       run: terraform validate
 
-    - name: Terraform Plan (infra-develop)
-      if: github.ref == 'refs/heads/infra-develop'
+    - name: Terraform Plan (PR or push)
       working-directory: ./infra
       run: terraform plan -lock=false -out=tfplan
       env:
@@ -75,7 +74,6 @@ jobs:
         TF_VAR_environment: "dev"
         TF_VAR_project_name: "microservice-app"
         TF_VAR_location: "eastus"
-        # Versiones de los servicios (usando latest por defecto)
         TF_VAR_frontend_version: "latest"
         TF_VAR_auth_api_version: "latest"
         TF_VAR_users_api_version: "latest"
@@ -83,36 +81,13 @@ jobs:
         TF_VAR_log_processor_version: "latest"
 
     - name: Upload Terraform Plan
-      if: github.ref == 'refs/heads/infra-develop'
       uses: actions/upload-artifact@v4
       with:
         name: terraform-plan
         path: ./infra/tfplan
 
-    - name: Terraform Plan & Validate (master)
-      if: github.ref == 'refs/heads/master'
-      working-directory: ./infra
-      run: |
-        terraform validate
-        terraform plan -lock=false -out=tfplan
-      env:
-        TF_VAR_subscription_id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-        TF_VAR_tenant_id: ${{ secrets.AZURE_TENANT_ID }}
-        TF_VAR_client_id: ${{ secrets.AZURE_CLIENT_ID }}
-        TF_VAR_client_secret: ${{ secrets.AZURE_CLIENT_SECRET }}
-        TF_VAR_jwt_secret: ${{ secrets.JWT_SECRET }}
-        TF_VAR_environment: "dev"
-        TF_VAR_project_name: "microservice-app"
-        TF_VAR_location: "eastus"
-        # Versiones de los servicios (usando latest por defecto)
-        TF_VAR_frontend_version: "latest"
-        TF_VAR_auth_api_version: "latest"
-        TF_VAR_users_api_version: "latest"
-        TF_VAR_todos_api_version: "latest"
-        TF_VAR_log_processor_version: "latest"
-
-    - name: Terraform Apply (master)
-      if: github.ref == 'refs/heads/master'
+    - name: Terraform Apply (Merge a master)
+      if: github.ref == 'refs/heads/master' && github.event_name == 'push'
       working-directory: ./infra
       run: terraform apply -auto-approve tfplan
       env:
@@ -124,7 +99,6 @@ jobs:
         TF_VAR_environment: "dev"
         TF_VAR_project_name: "microservice-app"
         TF_VAR_location: "eastus"
-        # Versiones de los servicios (usando latest por defecto)
         TF_VAR_frontend_version: "latest"
         TF_VAR_auth_api_version: "latest"
         TF_VAR_users_api_version: "latest"
