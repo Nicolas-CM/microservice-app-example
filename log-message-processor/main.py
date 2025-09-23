@@ -24,8 +24,27 @@ if __name__ == '__main__':
             headers={'Content-Type': 'application/x-thrift'},
         )
 
-    pubsub = redis.Redis(host=redis_host, port=redis_port, db=0).pubsub()
+    redis_password = os.environ['REDIS_PASSWORD']
+    # Configuración de Redis para Azure con SSL
+    redis_client = redis.Redis(
+        host=redis_host,
+        port=redis_port,
+        password=redis_password,
+        ssl=True,
+        decode_responses=True,
+        db=0
+    )
+    
+    # Intentar conectar y mostrar mensaje de éxito/error
+    try:
+        redis_client.ping()
+        print('Successfully connected to Redis!')
+    except Exception as e:
+        print('Failed to connect to Redis:', str(e))
+        
+    pubsub = redis_client.pubsub()
     pubsub.subscribe([redis_channel])
+    print(f'Subscribed to channel: {redis_channel}')
     for item in pubsub.listen():
         try:
             message = json.loads(str(item['data'].decode("utf-8")))
