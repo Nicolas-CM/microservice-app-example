@@ -101,7 +101,7 @@ module "todos_api" {
   resource_group_name = azurerm_resource_group.rg.name
   location            = var.location
   environment         = var.environment
-  sku_name            = "B1"
+  sku_name            = "S1" # Actualizado a Standard S1 para soportar autoscaling
 
   acr_login_server   = module.acr.login_server
   acr_admin_username = module.acr.admin_username
