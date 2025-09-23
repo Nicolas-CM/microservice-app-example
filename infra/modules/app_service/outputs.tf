@@ -11,6 +11,6 @@ output "identity_principal_id" {
 }
 
 output "app_service_plan_id" {
-  value = azurerm_service_plan.plan.id
+  value       = azurerm_service_plan.plan.id
   description = "ID of the App Service Plan"
 }

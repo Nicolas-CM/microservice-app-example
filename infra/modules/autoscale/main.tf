@@ -18,11 +18,11 @@ resource "azurerm_monitor_autoscale_setting" "app_autoscale" {
         metric_name        = "CpuPercentage"
         metric_resource_id = var.target_resource_id
         time_grain         = "PT1M"
-        statistic         = "Average"
-        time_window       = "PT5M"
-        time_aggregation  = "Average"
-        operator          = "GreaterThan"
-        threshold         = var.cpu_threshold_increase
+        statistic          = "Average"
+        time_window        = "PT5M"
+        time_aggregation   = "Average"
+        operator           = "GreaterThan"
+        threshold          = var.cpu_threshold_increase
       }
       scale_action {
         direction = "Increase"
@@ -38,11 +38,11 @@ resource "azurerm_monitor_autoscale_setting" "app_autoscale" {
         metric_name        = "CpuPercentage"
         metric_resource_id = var.target_resource_id
         time_grain         = "PT1M"
-        statistic         = "Average"
-        time_window       = "PT5M"
-        time_aggregation  = "Average"
-        operator          = "LessThan"
-        threshold         = var.cpu_threshold_decrease
+        statistic          = "Average"
+        time_window        = "PT5M"
+        time_aggregation   = "Average"
+        operator           = "LessThan"
+        threshold          = var.cpu_threshold_decrease
       }
       scale_action {
         direction = "Decrease"
@@ -58,11 +58,11 @@ resource "azurerm_monitor_autoscale_setting" "app_autoscale" {
         metric_name        = "MemoryPercentage"
         metric_resource_id = var.target_resource_id
         time_grain         = "PT1M"
-        statistic         = "Average"
-        time_window       = "PT5M"
-        time_aggregation  = "Average"
-        operator          = "GreaterThan"
-        threshold         = var.memory_threshold_increase
+        statistic          = "Average"
+        time_window        = "PT5M"
+        time_aggregation   = "Average"
+        operator           = "GreaterThan"
+        threshold          = var.memory_threshold_increase
       }
       scale_action {
         direction = "Increase"

@@ -128,12 +128,12 @@ module "todos_api_autoscale" {
   target_resource_id  = module.todos_api.app_service_plan_id
   environment         = var.environment
   service_name        = "todos-api"
-  
+
   # Configuración específica para todos-api
-  min_capacity             = 1
-  max_capacity             = 3  # Limitado a 3 instancias por ser entorno de desarrollo
-  cpu_threshold_increase   = 70
-  cpu_threshold_decrease   = 30
+  min_capacity              = 1
+  max_capacity              = 3 # Limitado a 3 instancias por ser entorno de desarrollo
+  cpu_threshold_increase    = 70
+  cpu_threshold_decrease    = 30
   memory_threshold_increase = 80
 }
 
