@@ -9,7 +9,7 @@ terraform {
 
 provider "azurerm" {
   features {}
-  
+
   subscription_id = var.subscription_id
   tenant_id       = var.tenant_id
   client_id       = var.client_id
@@ -33,7 +33,7 @@ resource "azurerm_storage_account" "state" {
   location                 = azurerm_resource_group.state.location
   account_tier             = "Standard"
   account_replication_type = "LRS"
-  
+
   tags = {
     Environment = var.environment
     Project     = var.project_name
