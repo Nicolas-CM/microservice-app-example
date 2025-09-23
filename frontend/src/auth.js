@@ -57,6 +57,7 @@ export default {
       password: creds.password
     }
 
+    console.log('Intentando login en:', LOGIN_URL)
     return Vue.http.post(LOGIN_URL, params)
       .then((response) => {
         this._storeToken(response)
