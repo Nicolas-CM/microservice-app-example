@@ -89,7 +89,7 @@ jobs:
     - name: Terraform Apply (Merge a master)
       if: github.ref == 'refs/heads/master' && github.event_name == 'push'
       working-directory: ./infra
-      run: terraform apply -auto-approve tfplan
+      run: terraform apply -lock=false -auto-approve tfplan
       env:
         TF_VAR_subscription_id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
         TF_VAR_tenant_id: ${{ secrets.AZURE_TENANT_ID }}
