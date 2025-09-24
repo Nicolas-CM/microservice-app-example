@@ -50,13 +50,26 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REDIS_CHANNEL=log_channel
+      - REDIS_PASSWORD=
+      - ZIPKIN_URL=http://zipkin:9411/api/v1/spans
     depends_on:
       - redis
+      - zipkin
+  zipkin:
+    image: openzipkin/zipkin:2.24
+    ports:
+      - "9411:9411"
 
   redis:
     image: redis:alpine
     ports:
       - "6379:6379"
+    command: ["redis-server", "--requirepass", "miclave123"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "miclave123", "ping"]
+      interval: 2s
+      timeout: 2s
+      retries: 10
 
 networks:
   default:
