@@ -116,6 +116,7 @@ module "todos_api" {
     "REDIS_PORT"     = module.redis.redis_port
     "REDIS_PASSWORD" = module.redis.redis_password
     "REDIS_CHANNEL"  = "log_channel"
+    "ZIPKIN_URL"     = "http://${module.zipkin.zipkin_url}:9411/api/v1/spans"
   }
 }
 
@@ -158,5 +159,16 @@ module "log_processor" {
     "REDIS_PORT"     = module.redis.redis_port
     "REDIS_PASSWORD" = module.redis.redis_password
     "REDIS_CHANNEL"  = "log_channel"
+    "ZIPKIN_URL"     = "http://${module.zipkin.zipkin_url}:9411/api/v1/spans"
   }
+}
+
+module "zipkin" {
+  source              = "./modules/zipkin"
+  resource_group_name = azurerm_resource_group.rg.name
+  location            = var.location
+  app_name            = "${var.project_name}-${var.environment}-zipkin"
+  sku_name            = "B1"
+  environment         = var.environment
+  zipkin_image        = "${module.acr.login_server}/zipkin:2.24"
 }
