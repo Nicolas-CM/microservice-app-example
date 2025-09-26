@@ -14,7 +14,9 @@ resource "azurerm_linux_web_app" "zipkin" {
 
   site_config {
     always_on = true
-    linux_fx_version = "DOCKER|${var.zipkin_image}"
+    application_stack {
+      docker_image_name = var.zipkin_image
+    }
   }
 
   app_settings = {
