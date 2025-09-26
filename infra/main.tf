@@ -172,6 +172,6 @@ module "zipkin" {
   environment         = var.environment
   zipkin_image        = "${module.acr.login_server}/zipkin:2.24"
   acr_login_server    = module.acr.login_server
-  acr_username        = module.acr.admin_username
-  acr_password        = module.acr.admin_password
+  acr_admin_username  = module.acr.admin_username
+  acr_admin_password  = module.acr.admin_password
 }

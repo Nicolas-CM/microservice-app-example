@@ -1,3 +1,17 @@
+variable "acr_login_server" {
+  description = "URL del login server del ACR (ejemplo: microserviceappdevacr.azurecr.io)"
+  type        = string
+}
+variable "acr_admin_username" {
+  description = "Usuario admin del ACR"
+  type        = string
+}
+
+variable "acr_admin_password" {
+  description = "Password admin del ACR"
+  type        = string
+  sensitive   = true
+}
 variable "resource_group_name" {
   description = "Nombre del resource group para Zipkin"
   type        = string
