@@ -13,14 +13,19 @@ resource "azurerm_linux_web_app" "zipkin" {
   service_plan_id     = azurerm_service_plan.zipkin_plan.id
 
   site_config {
+    always_on = true
     application_stack {
       docker_image_name = var.zipkin_image
     }
-    always_on = true
   }
 
   app_settings = {
-    "WEBSITES_ENABLE_APP_SERVICE_STORAGE" = "false"
+    WEBSITES_PORT = "9411"
+    ZIPKIN_STORAGE_TYPE = "mem"
+  DOCKER_REGISTRY_SERVER_URL      = var.acr_login_server
+  DOCKER_REGISTRY_SERVER_USERNAME = var.acr_admin_username
+  DOCKER_REGISTRY_SERVER_PASSWORD = var.acr_admin_password
+    WEBSITES_ENABLE_APP_SERVICE_STORAGE = "false"
   }
 
   tags = {
