@@ -1,3 +1,6 @@
+output "login_server" {
+  value = module.acr.login_server
+}
 resource "azurerm_resource_group" "rg" {
   name     = "${var.project_name}-${var.environment}-rg"
   location = var.location
