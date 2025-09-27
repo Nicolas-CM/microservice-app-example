@@ -154,8 +154,8 @@ module "log_processor" {
   acr_login_server   = module.acr.login_server
   acr_admin_username = module.acr.admin_username
   acr_admin_password = module.acr.admin_password
-  docker_image       = "log-message-processor"
-  docker_image_tag   = var.log_processor_version
+  docker_image       = "log-processor"
+  docker_image_tag   = "latest"
 
   app_settings = {
     "REDIS_HOST"     = module.redis.redis_host
