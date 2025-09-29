@@ -48,6 +48,7 @@ module "frontend" {
   app_settings = {
     "AUTH_API_URL"  = "https://${module.auth_api.app_url}"
     "TODOS_API_URL" = "https://${module.todos_api.app_url}"
+    "ZIPKIN_URL"    = "http://${module.zipkin.zipkin_url}/api/v2/spans"
   }
 }
 
@@ -71,6 +72,7 @@ module "auth_api" {
     "AUTH_API_PORT"     = "8081"
     "USERS_API_ADDRESS" = "https://${module.users_api.app_url}"
     "JWT_SECRET"        = var.jwt_secret
+    "ZIPKIN_URL"        = "http://${module.zipkin.zipkin_url}/api/v2/spans"
   }
 }
 
@@ -91,8 +93,10 @@ module "users_api" {
   docker_image_tag   = var.users_api_version
 
   app_settings = {
-    "SERVER_PORT" = "8083"
-    "JWT_SECRET"  = var.jwt_secret
+    "SERVER_PORT"      = "8083"
+    "JWT_SECRET"       = var.jwt_secret
+    "ZIPKIN_URL"       = "http://${module.zipkin.zipkin_url}/api/v2/spans"
+    "ZIPKIN_BASE_URL"  = "http://${module.zipkin.zipkin_url}/"
   }
 }
 
@@ -119,7 +123,7 @@ module "todos_api" {
     "REDIS_PORT"     = module.redis.redis_port
     "REDIS_PASSWORD" = module.redis.redis_password
     "REDIS_CHANNEL"  = "log_channel"
-    "ZIPKIN_URL"     = "http://${module.zipkin.zipkin_url}:9411/api/v1/spans"
+    "ZIPKIN_URL"     = "http://${module.zipkin.zipkin_url}/api/v2/spans"
   }
 }
 
@@ -162,7 +166,7 @@ module "log_processor" {
     "REDIS_PORT"     = module.redis.redis_port
     "REDIS_PASSWORD" = module.redis.redis_password
     "REDIS_CHANNEL"  = "log_channel"
-    "ZIPKIN_URL"     = "http://${module.zipkin.zipkin_url}:9411/api/v1/spans"
+    "ZIPKIN_URL"     = "http://${module.zipkin.zipkin_url}/api/v2/spans"
   }
 }
 
