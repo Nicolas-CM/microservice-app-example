@@ -26,113 +26,94 @@ La aplicación está compuesta por los siguientes microservicios:
 ├── docker-compose.yml       # Orquestación de servicios
 └── README.md
 ```
+# Microservice App Example - Reporte de Implementación
 
-## Orquestación y Ejecución Local
+## Índice
 
-Todos los servicios pueden ser levantados fácilmente usando Docker Compose:
+- [Antes: Estado Inicial del Proyecto](#antes-estado-inicial-del-proyecto)
+- [Después: Trabajo Realizado](#después-trabajo-realizado)
+- [Estándares y Buenas Prácticas](docs/project_standars.md)
+- [Volver al README principal](#microservice-app-example---reporte-de-implementación)
 
-```bash
-docker-compose up --build
+---
+
+## Antes: Estado Inicial del Proyecto
+
+Al inicio, recibimos una base de código con los siguientes microservicios ya programados y funcionales:
+
+- **Users API** (Java Spring Boot): Gestión de usuarios.
+- **Auth API** (Go): Autenticación y generación de JWT.
+- **TODOs API** (Node.js): CRUD de tareas y logging a Redis.
+- **Log Message Processor** (Python): Procesador de logs desde Redis.
+- **Frontend** (Vue.js): Interfaz de usuario.
+
+La estructura del proyecto era la siguiente:
+
+```
+├── auth-api/
+├── todos-api/
+├── users-api/
+├── log-message-processor/
+├── frontend/
+├── infra/
+├── docker-compose.yml
+└── README.md
 ```
 
-Esto levantará:
-- Frontend en `http://localhost:8080`
-- Auth API en `http://localhost:8081`
-- TODOs API en `http://localhost:8082`
-- Users API en `http://localhost:8083`
-- Redis en `localhost:6379`
+Cada microservicio contaba con su propia lógica, pero no existía una solución de orquestación ni despliegue automatizado.
 
-Variables de entorno principales (ver `docker-compose.yml`):
-- `JWT_SECRET`: Secreto compartido para JWT.
-- `REDIS_HOST`, `REDIS_PORT`, `REDIS_CHANNEL`: Configuración de Redis.
-- `AUTH_API_PORT`, `TODO_API_PORT`, `SERVER_PORT`: Puertos de los servicios.
+---
 
-## Resumen de Microservicios
+## Después: Trabajo Realizado
 
-### Users API (`/users-api`)
-- **Tecnología:** Java + Spring Boot
-- **Endpoints:** `/users`, `/users/:username`
-- **Build:** `./mvnw clean install`
-- **Run:** `JWT_SECRET=PRFT SERVER_PORT=8083 java -jar target/users-api-0.0.1-SNAPSHOT.jar`
-- **Dependencias:** Java openJDK8
+### 1. Contenerización de Microservicios
 
-### Auth API (`/auth-api`)
-- **Tecnología:** Go
-- **Endpoint:** `/login`
-- **Build:** `go build`
-- **Run:** `AUTH_API_PORT=8000 USERS_API_ADDRESS=... JWT_SECRET=... ./auth-api`
-- **Usuarios por defecto:** admin/admin, johnd/foo, janed/ddd
-- **Dependencias:** Go 1.18.2
+- Se creó un `Dockerfile` específico para cada microservicio ([auth-api/Dockerfile](auth-api/Dockerfile), [todos-api/Dockerfile](todos-api/Dockerfile), [users-api/Dockerfile](users-api/Dockerfile), [log-message-processor/Dockerfile](log-message-processor/Dockerfile), [frontend/Dockerfile](frontend/Dockerfile)).
+- Se aseguraron buenas prácticas de construcción, uso de imágenes base apropiadas y definición de variables de entorno.
 
-### TODOs API (`/todos-api`)
-- **Tecnología:** Node.js
-- **Endpoints:** `/todos` (GET, POST), `/todos/:taskId` (DELETE)
-- **Build:** `npm install`
-- **Run:** `JWT_SECRET=PRFT TODO_API_PORT=8082 npm start`
-- **Dependencias:** Node 8.17.0, NPM 6.13.4
+### 2. Orquestación Local con Docker Compose
 
-### Log Message Processor (`/log-message-processor`)
-- **Tecnología:** Python
-- **Función:** Consume mensajes de Redis y los imprime.
-- **Build:** `pip3 install -r requirements.txt`
-- **Run:** `REDIS_HOST=127.0.0.1 REDIS_PORT=6379 REDIS_CHANNEL=log_channel python3 main.py`
-- **Dependencias:** Python 3.6, Redis 7.0
+- Se diseñó un archivo [docker-compose.yml](docker-compose.yml) para levantar todos los servicios de manera coordinada en local.
+- Esto permitió pruebas integradas y facilitó el desarrollo colaborativo.
 
-### Frontend (`/frontend`)
-- **Tecnología:** Vue.js
-- **Build:** `npm install && npm run build`
-- **Run:** `PORT=8080 AUTH_API_ADDRESS=http://127.0.0.1:8000 TODOS_API_ADDRESS=http://127.0.0.1:8082 npm start`
-- **Dependencias:** Node 8.17.0, NPM 6.13.4
+### 3. Infraestructura como Código (IaC) con Terraform
 
-## Infraestructura como Código (Terraform)
+- Se implementó el directorio [infra/](infra/) con módulos reutilizables para cada recurso.
+- Recursos principales creados:
+  - **Azure Container Registry (ACR):** Para almacenar imágenes de contenedores ([infra/modules/acr](infra/modules/acr)).
+  - **App Services y App Service Plans:** Para desplegar cada microservicio y el frontend ([infra/modules/app_service](infra/modules/app_service)).
+  - **Redis Cache:** Para la persistencia y comunicación entre servicios ([infra/modules/redis](infra/modules/redis)).
+  - **Autoscaling:** Configuración de escalado automático para el TODOs API ([infra/modules/autoscale](infra/modules/autoscale)).
+  - **Zipkin:** Para trazabilidad distribuida ([infra/modules/zipkin](infra/modules/zipkin)).
+  - **Backend remoto:** Almacenamiento del estado de Terraform en Azure Storage ([infra/backend](infra/backend)).
 
-El directorio `infra/` contiene toda la definición de infraestructura para desplegar los microservicios en Azure usando Terraform:
+- Se parametrizó el despliegue usando variables para versiones, credenciales y configuración de cada entorno.
 
-- **Recursos principales:**
-	- Resource Group
-	- Azure Container Registry (ACR)
-	- Redis Cache
-	- App Services para cada microservicio y frontend
-	- Autoscaling para TODOs API
+![Arquitectura General](docs/images/diagram.png)
 
-- **Variables importantes:**
-	- `project_name`, `environment`, `location`, `jwt_secret`, credenciales de Azure
-	- Versiones de cada microservicio (por variable)
+### 4. Automatización de Workflows CI/CD
 
-- **Backend remoto:**
-	- El estado de Terraform se almacena en un Storage Account de Azure (ver `backend.conf`)
+- Se crearon workflows en [`.github/workflows/`](.github/workflows/) para:
+  - Construir y subir imágenes de cada microservicio al ACR.
+  - Desplegar automáticamente la última versión (`latest`) en los App Services correspondientes.
+  - Uso de **Service Principal** para autenticación segura con Azure.
+  - Cada push de una nueva versión de un contenedor actualiza el App Service para apuntar a la imagen `latest`, asegurando despliegue continuo.
 
-### Ejemplo de despliegue en Azure
+### 5. Estándares y Buenas Prácticas
 
-1. Configura tus credenciales de Azure y variables en un archivo `.tfvars` o como variables de entorno.
-2. Inicializa Terraform:
-	 ```bash
-	 cd infra
-	 terraform init -backend-config=backend.conf
-	 ```
-3. Previsualiza los cambios:
-	 ```bash
-	 terraform plan -var-file="dev.tfvars"
-	 ```
-4. Aplica la infraestructura:
-	 ```bash
-	 terraform apply -var-file="dev.tfvars"
-	 ```
+- Se documentaron los estándares de desarrollo, branching y commits en [docs/project_standars.md](docs/project_standars.md).
+- [Ir a los estándares del proyecto →](docs/project_standars.md)
 
-Esto creará todos los recursos en Azure, desplegará los contenedores desde ACR y configurará autoscaling para el API de TODOs.
+---
 
-## Buenas Prácticas y Dev
+## Conclusión
 
-- Cada microservicio tiene su propio README con detalles de endpoints y configuración.
-- Usa ramas feature/ para desarrollo y PRs para integración.
-- El frontend y los microservicios pueden desarrollarse y probarse localmente usando Docker Compose.
-- El despliegue en Azure replica la arquitectura local, pero usando servicios administrados.
+El proyecto pasó de ser un conjunto de microservicios aislados a una solución completamente orquestada, automatizada y lista para despliegue en Azure, siguiendo buenas prácticas de DevOps e infraestructura como código.
 
-## Créditos
+## Autores
 
-Proyecto base para entrenamiento DevOps y microservicios.
-Autores original:
- 
-Nicolas Cuellar Molina
+[Nicolás Cuéllar Molina](https://github.com/Nicolas-CM)
 
-Samuel Alvarez Alban
+[Samuel Álvarez Alban](https://github.com/Freddyedd21)
+
+[⬆️ Volver al inicio del README](#microservice-app-example---reporte-de-implementación)
