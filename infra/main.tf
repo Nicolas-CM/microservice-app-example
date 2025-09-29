@@ -93,10 +93,10 @@ module "users_api" {
   docker_image_tag   = var.users_api_version
 
   app_settings = {
-    "SERVER_PORT"      = "8083"
-    "JWT_SECRET"       = var.jwt_secret
-    "ZIPKIN_URL"       = "http://${module.zipkin.zipkin_url}/api/v2/spans"
-    "ZIPKIN_BASE_URL"  = "http://${module.zipkin.zipkin_url}/"
+    "SERVER_PORT"     = "8083"
+    "JWT_SECRET"      = var.jwt_secret
+    "ZIPKIN_URL"      = "http://${module.zipkin.zipkin_url}/api/v2/spans"
+    "ZIPKIN_BASE_URL" = "http://${module.zipkin.zipkin_url}/"
   }
 }
 
