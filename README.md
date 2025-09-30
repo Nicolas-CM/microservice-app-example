@@ -12,7 +12,7 @@ La aplicación está compuesta por los siguientes microservicios:
 - **Log Message Processor** (Python): Procesador de logs desde Redis.
 - **Frontend** (Vue.js): Interfaz de usuario.
 
-![Arquitectura](/arch-img/Microservices.png)
+<img src="arch-img/Microservices.png" alt="Arquitectura" width="600"/>
 
 ## Estructura del Proyecto
 
@@ -26,6 +26,9 @@ La aplicación está compuesta por los siguientes microservicios:
 ├── docker-compose.yml       # Orquestación de servicios
 └── README.md
 ```
+
+<img src="docs/images/microservicios.png" alt="Microservicios" width="500"/>
+
 # Microservice App Example - Reporte de Implementación
 
 ## Índice
@@ -79,6 +82,9 @@ Cada microservicio contaba con su propia lógica, pero no existía una solución
 ### 3. Infraestructura como Código (IaC) con Terraform
 
 - Se implementó el directorio [infra/](infra/) con módulos reutilizables para cada recurso.
+
+<img src="docs/images/infraAsCode.png" alt="Arquitectura As Code" width="500"/>
+
 - Recursos principales creados:
   - **Azure Container Registry (ACR):** Para almacenar imágenes de contenedores ([infra/modules/acr](infra/modules/acr)).
   - **App Services y App Service Plans:** Para desplegar cada microservicio y el frontend ([infra/modules/app_service](infra/modules/app_service)).
@@ -89,7 +95,9 @@ Cada microservicio contaba con su propia lógica, pero no existía una solución
 
 - Se parametrizó el despliegue usando variables para versiones, credenciales y configuración de cada entorno.
 
-![Arquitectura General](docs/images/diagram.png)
+### Diagrama de Arquitectura
+
+<img src="docs/images/diagram.png" alt="Arquitectura General" width="600"/>
 
 ### 4. Automatización de Workflows CI/CD
 
@@ -99,10 +107,55 @@ Cada microservicio contaba con su propia lógica, pero no existía una solución
   - Uso de **Service Principal** para autenticación segura con Azure.
   - Cada push de una nueva versión de un contenedor actualiza el App Service para apuntar a la imagen `latest`, asegurando despliegue continuo.
 
+<img src="docs/images/pipelineCiCd.png" alt="Pipeline" width="500"/>
+
+#### Pipeline de Infraestructura
+Además se realizó el workflow para cuando se modifique en la carpeta de /infra, automáticamente se hagan los cambios en el Azure
+
+El terraform apply solamente se realiza cuando se completa el PR a master
+
+<img src="docs/images/pipelineInfra.png" alt="Pipeline Infra" width="500"/>
+
 ### 5. Estándares y Buenas Prácticas
 
 - Se documentaron los estándares de desarrollo, branching y commits en [docs/project_standars.md](docs/project_standars.md).
 - [Ir a los estándares del proyecto →](docs/project_standars.md)
+
+### 6. Patrones de Diseño
+
+En este proyecto se implementaron los siguientes patrones de diseño clave para la escalabilidad y eficiencia:
+
+- **Autoscaling (Escalado Automático):**
+  - Se configuró el escalado automático para el microservicio TODOs API usando un App Service Plan Standard S1.
+  - **Reglas de escalado:**
+    - Si la CPU > 70% → Scale Out (+1 instancia)
+    - Si la memoria > 80% → Scale Out (+1 instancia)
+    - Si la CPU < 30% → Scale In (-1 instancia)
+  - **Límites:** mínimo 1 instancia, máximo 3 instancias.
+  - Esto permite ajustar dinámicamente los recursos según la demanda, optimizando costos y asegurando alta disponibilidad.
+
+- **Cache Aside:**
+  - Se implementó el patrón Cache Aside usando Redis. Los microservicios consultan primero la caché antes de acceder a la base de datos.
+  - Si el dato no está en caché, se recupera de la base de datos y se almacena en Redis para futuras consultas.
+  - Este enfoque reduce la carga sobre la base de datos principal y mejora el rendimiento general de la aplicación.
+
+Ambos patrones contribuyen a la escalabilidad, resiliencia y eficiencia de la solución, alineándose con las mejores prácticas de arquitectura de microservicios en la nube.
+
+### 7. Teconologías usadas
+
+<img src="docs/images/tecnologias.png" alt="Tecnologías" width="400"/>
+
+### 8. Portal Azure
+
+Evidencia de los recursos creados en Azure a partir de terraform.
+
+<img src="docs/images/portalAzure.png" alt="Portal Azure" width="600"/>
+
+### 9. Costos
+
+Se evidenció un costo un poco alto, donde el mayor causante es el uso de un App Service Plan Standard S1 para el AutoScaling, razón por la que el autoscaling es solamente aplicado a este servicio.
+
+<img src="docs/images/costos.png" alt="Costos" width="500"/>
 
 ---
 

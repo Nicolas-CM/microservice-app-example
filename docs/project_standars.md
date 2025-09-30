@@ -62,4 +62,6 @@ Utilizamos Main-Only Strategy para infraestructura, priorizando la estabilidad y
 
 docs: adding images
 
+<img src="images/branches.png" alt="Costos" width="400"/>
+
 ## [Volver al README](../README.md)
