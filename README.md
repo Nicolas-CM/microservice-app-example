@@ -163,6 +163,22 @@ Se evidenció un costo un poco alto, donde el mayor causante es el uso de un App
 
 El proyecto pasó de ser un conjunto de microservicios aislados a una solución completamente orquestada, automatizada y lista para despliegue en Azure, siguiendo buenas prácticas de DevOps e infraestructura como código.
 
+### Conclusiones Adicionales
+
+- **Arquitectura de Microservicios:** La adopción de microservicios permitió desacoplar responsabilidades, facilitando la escalabilidad y el mantenimiento de cada componente de forma independiente.
+
+- **Contenerización y Orquestación:** El uso de contenedores y Docker Compose simplificó el proceso de desarrollo local y la integración entre servicios, reduciendo errores de configuración y acelerando la puesta en marcha de nuevos entornos.
+
+- **Azure App Services:** La implementación en Azure App Services proporcionó una plataforma PaaS robusta que simplificó el despliegue y la gestión de los microservicios, eliminando la complejidad de administrar la infraestructura subyacente.
+
+- **CI/CD e Infraestructura como Código:** La integración de pipelines CI/CD y la infraestructura como código (IaC) con Terraform mejoró la trazabilidad, repetibilidad y seguridad en los despliegues, minimizando la intervención manual y los riesgos asociados.
+
+- **Patrones de Escalabilidad:** La implementación de patrones como Cache Aside con Redis y Autoscaling en App Services demostró ser fundamental para optimizar el rendimiento y la eficiencia de los recursos, alineándose con escenarios reales de producción en la nube.
+
+- **Experiencia de Aprendizaje:** El proyecto sirvió como una excelente base para experimentar con tecnologías en la nube de Azure, buenas prácticas de DevOps y estrategias de despliegue automatizado con App Services, sentando las bases para futuras mejoras y ampliaciones.
+
+- **Optimización de Costos:** El análisis de costos reveló la importancia de seleccionar adecuadamente los niveles de servicio (como el App Service Plan Standard S1 para autoscaling), equilibrando rendimiento y economía en soluciones cloud.
+
 ## Autores
 
 [Nicolás Cuéllar Molina](https://github.com/Nicolas-CM)
