@@ -163,7 +163,6 @@ Se evidenció un costo un poco alto, donde el mayor causante es el uso de un App
 
 El proyecto pasó de ser un conjunto de microservicios aislados a una solución completamente orquestada, automatizada y lista para despliegue en Azure, siguiendo buenas prácticas de DevOps e infraestructura como código.
 
-### Conclusiones Adicionales
 
 - **Arquitectura de Microservicios:** La adopción de microservicios permitió desacoplar responsabilidades, facilitando la escalabilidad y el mantenimiento de cada componente de forma independiente.
 
